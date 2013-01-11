@@ -1,0 +1,23 @@
+{
+    "name": "jnankin/jotform-gridToCSV",
+    "type": "library",
+    "description": "Converts a jotform grid report to a csv",
+    "keywords": [],
+    "homepage": "https://github.com/jnankin/jotform-gridToCSV",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Josh Nankin",
+            "email": "jnankin@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.3",
+	"symfony/console":"v2.1.5"
+    },
+    "autoload": {
+        "psr-0": { "Jnankin\\Utils\\": "" }
+    },
+    "target-dir": "Jnankin/Utils",
+    "minimum-stability": "dev"
+}

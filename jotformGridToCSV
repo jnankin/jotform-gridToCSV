@@ -1,0 +1,51 @@
+#!/usr/bin/php
+<?php
+namespace Jnankin\Utils;
+include('vendor/autoload.php');
+
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Application;
+
+$script = array_shift($argv);
+array_unshift($argv, 'default');
+array_unshift($argv, $script);
+$argvInput = new \Symfony\Component\Console\Input\ArgvInput($argv);
+
+$console = new Application();
+$console
+    ->register('default')
+    ->setDefinition(array(
+        new InputArgument('url', InputArgument::REQUIRED, 'Jotform grid report url'),
+	new InputArgument('outfile', InputArgument::OPTIONAL, 'Output path', 'out.csv')
+    ))
+    ->setDescription('Displays the files in the given directory')
+    ->setCode(function (InputInterface $input, OutputInterface $output) {
+	$gridHtml = file_get_contents($input->getArgument('url'));
+	//get formId and listId
+	$matches = array();
+	preg_match("/formID=([0-9]+)&listID=([0-9]+)/", $gridHtml, $matches);
+	$grid = json_decode(file_get_contents("http://www.jotform.com/server.php?action=getExtGridSubmissions&formID={$matches[1]}&listID={$matches[2]}&sort=created_at&dir=DESC"), true);
+	$grid = $grid['data'];
+
+	$fp = fopen($input->getArgument('outfile'), 'w');
+
+	foreach($grid as $row){
+		$fields = array();
+		foreach($row as $key=>$value){
+			if (is_numeric($key)){
+				$value = strip_tags(str_replace("<br>", "\n", $value));
+				$value = str_replace("\n", " ", $value);
+				$fields[] = $value;
+			}
+		}
+		fputcsv($fp, $fields);
+	}
+
+	fclose($fp);
+    })
+;
+
+$console->run($argvInput);
